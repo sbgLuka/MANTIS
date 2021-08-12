@@ -53,8 +53,8 @@ class LocusResults(object):
 
         line = line.strip().split()
         if line[0].lower() != self.locus().lower():
-            tprint('Error: Invalid locus specified ' 
-                + '(expected {0}, got {1}'.format(self.locus(), line[0]))
+            tprint('Error: Invalid locus specified '
+                   + '(expected {0}, got {1}'.format(self.locus(), line[0]))
             return False
 
         # Each line is expected to be in the format of:
@@ -318,8 +318,8 @@ def status_output(filepath, thresholds, difference, distance, dissimilarity):
         status_call(thresholds['COS'], dissimilarity),
         ])
 
-    output.append(['\nNote: The authors recommend the use of the Step-Wise Difference\n' +
-                   'metric for determining the status of the sample. Any value greater\n' +
+    output.append(['Note: The authors recommend the use of the Step-Wise Difference' +
+                   'metric for determining the status of the sample. Any value greater' +
                    'than or equal to the threshold is called unstable.'])
 
     fileout = open(filepath, 'w')
@@ -443,8 +443,8 @@ if __name__ == "__main__":
             locus.locus(),
             locus.get_support('N'),
             locus.get_support('T'),
-            round(difference,4),
-            round(distance,4),
+            round(difference, 4),
+            round(distance, 4),
             round(dissimilarity, 4)]])
 
         # Values will be used to calculate final averaged values.
@@ -464,8 +464,8 @@ if __name__ == "__main__":
             'Average',
             '-',
             '-',
-            round(avg_difference,4),
-            round(avg_distance,4),
+            round(avg_difference, 4),
+            round(avg_distance, 4),
             round(avg_dissimilarity, 4)]])
         fileout.write(line + '\n')
         output_status_block = True
