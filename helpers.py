@@ -9,6 +9,8 @@ Since the functionality of .iteritems() has changed between
 Python 2 and 3, this function attempts to bridge the gap and
 provide similar functionality regardless of Python version.
 """
+
+
 def iteritems(d):
     if hasattr(d, 'iteritems'):
         return d.iteritems()
@@ -16,21 +18,28 @@ def iteritems(d):
         return list(d.items())
     # end .iteritems()
 
+
 """
 Returns the current time in a m/d/y H:M:S format.
 """
+
+
 def timestamp():
     return time.strftime('%m/%d/%y %H:%M:%S')
     # end .timestamp()
 
+
 """
 Prints the input string's line(s) with prepended timestamp(s).
 """
+
+
 def tprint(string):
     output = string.split('\t')
     for line in output:
         print('[{0}] {1}'.format(timestamp(), line))
     # end .tprint()
+
 
 """
 Checks to make sure the BED file has the expected 6-column
@@ -41,6 +50,8 @@ maintain the BED 6-col format.
 e.g.
 chr1  10357206    10357223    (T)17   0   +
 """
+
+
 def check_bedfile_format(filepath):
     with open(filepath, 'Ur') as f:
         line_number = 0
@@ -50,9 +61,9 @@ def check_bedfile_format(filepath):
             if len(line):
                 line = line.split('\t')
                 if len(line) != 6:
-                    print('Error: MANTIS expects a 6-column BED file with' + 
-                        ' the 4th column containing the kmer repeat' + 
-                        ' sequence and count (e.g. (T)15 or (CAC)5 ).')
+                    print('Error: MANTIS expects a 6-column BED file with' +
+                          ' the 4th column containing the kmer repeat' +
+                          ' sequence and count (e.g. (T)15 or (CAC)5 ).')
                     print('\nOffending line (line {0}) has:'.format(line_number))
                     for n, value in enumerate(line):
                         print('[{0}]\t{1}'.format(n, value))
@@ -79,12 +90,11 @@ def check_bedfile_format(filepath):
                     else:
                         kmer_format_ok = False
 
-
                     if not kmer_format_ok:
-                        print('Error: MANTIS expects the kmer column in the' + 
-                            ' BED file to follow a (XX)NN type format, with' +
-                            ' the repeat unit wrapped in parentheses,' +
-                            ' followed by the expected number of repeats.')
+                        print('Error: MANTIS expects the kmer column in the' +
+                              ' BED file to follow a (XX)NN type format, with' +
+                              ' the repeat unit wrapped in parentheses,' +
+                              ' followed by the expected number of repeats.')
                         return False
         return True
     # end .check_bedfile_format()
@@ -94,7 +104,9 @@ def check_bedfile_format(filepath):
 Determines how many times the k-mer repeats in a row
 within the given sequence.
 """
-def kmer_repeat_count(kmer, sequence, offset = 0):
+
+
+def kmer_repeat_count(kmer, sequence, offset=0):
     repeats = 0
     klen = len(kmer)
     while True:
@@ -108,6 +120,7 @@ def kmer_repeat_count(kmer, sequence, offset = 0):
             break
     return repeats
 # end kmer_repeat_count()
+
 
 # Checks to make sure required modules are present in environment
 def required_modules_present(modules):
@@ -124,7 +137,7 @@ def required_modules_present(modules):
         for module in modules:            
             print('Error: You must have {0} available in your environment!'.format(module))
         print('Please check your $PYTHONPATH to make sure you have properly ' +
-            'included required moudles/libraries in it.')
+              'included required modules/libraries in it.')
         exit(1)
     return True
     # end required_modules_present()

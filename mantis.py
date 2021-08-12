@@ -7,73 +7,69 @@
 import os
 import sys
 import argparse
-import operator
 import subprocess
-from helpers import iteritems, check_bedfile_format, required_modules_present
+from helpers import check_bedfile_format, required_modules_present
 from defaults import load_settings, Parameter
 
 
-
 if __name__ == "__main__":
-    prog_name = 'Microsatellite Analysis for Normal-Tumor InStability (v1.0.4)'
+    prog_name = 'Microsatellite Analysis for Normal-Tumor InStability (v1.0.5)'
     print(prog_name)
 
     # Make sure Pysam and NumPy are available in environment
     required_modules_present(['Pysam', 'NumPy'])
 
-
     parser = argparse.ArgumentParser(description=prog_name)
 
     parser.add_argument('-cfg', '--config', dest='cfg', type=str,
-        help='Configuration file.')
+                        help='Configuration file.')
 
     parser.add_argument('-n', '--normal', dest='normal', type=str, required=True,
-        help='Normal input BAM file.')
+                        help='Normal input BAM file.')
 
     parser.add_argument('-t', '--tumor', dest='tumor', type=str,  required=True,
-        help='Tumor input BAM file.')
+                        help='Tumor input BAM file.')
 
     parser.add_argument('--threads', dest='threads', type=int,
-        help='How many threads (processes) to use.')
+                        help='How many threads (processes) to use.')
 
     parser.add_argument('-b', '--bedfile', dest='bedfile', type=str, help='Input BED file.')
 
     parser.add_argument('-o', '--output', dest='output', type=str, help='Output filename.')
 
-    parser.add_argument('-mrq', '--min-read-quality', dest='mrq', type=float, 
-        help='Minimum average read quality.')
+    parser.add_argument('-mrq', '--min-read-quality', dest='mrq', type=float,
+                        help='Minimum average read quality.')
 
     parser.add_argument('-mlq', '--min-locus-quality', dest='mlq', type=float,
-        help='Minimum average locus quality.')
+                        help='Minimum average locus quality.')
 
-    parser.add_argument('-mrl', '--min-read-length', dest='mrl', type=int, 
-        help='Minimum (unclipped/unmasked) read length.')
+    parser.add_argument('-mrl', '--min-read-length', dest='mrl', type=int,
+                        help='Minimum (unclipped/unmasked) read length.')
 
-    parser.add_argument('-mlc', '--min-locus-coverage', dest='mlc', type=int, 
-        help='Minimum coverage required for each of the normal ' +
-        'and tumor results.')
+    parser.add_argument('-mlc', '--min-locus-coverage', dest='mlc', type=int,
+                        help='Minimum coverage required for each of the normal ' +
+                             'and tumor results.')
 
-    parser.add_argument('-mrr', '--min-repeat-reads', dest='mrr', type=int, 
-        help='Minimum reads supporting a specific repeat count.')
+    parser.add_argument('-mrr', '--min-repeat-reads', dest='mrr', type=int,
+                        help='Minimum reads supporting a specific repeat count.')
 
     parser.add_argument('-sd', '--standard-deviations', dest='sd', type=float,
-        help='Standard deviations from mean before repeat count is ' +
-        'considered an outlier')
+                        help='Standard deviations from mean before repeat count is ' +
+                             'considered an outlier')
 
-    parser.add_argument('--genome', dest='genome', type=str, 
-        help='Path to reference genome (FASTA).')
+    parser.add_argument('--genome', dest='genome', type=str,
+                        help='Path to reference genome (FASTA).')
 
     parser.add_argument('--difference-threshold', dest='dif_threshold', type=float,
-        help='Default difference threshold value for calling a sample unstable.')
+                        help='Default difference threshold value for calling a sample unstable.')
 
     parser.add_argument('--distance-threshold', dest='euc_threshold', type=float,
-        help='Default distance threshold value for calling a sample unstable.')
+                        help='Default distance threshold value for calling a sample unstable.')
 
     parser.add_argument('--dissimilarity-threshold', dest='cos_threshold', type=float,
-        help='Default dissimilarity threshold value for calling a sample unstable.')
+                        help='Default dissimilarity threshold value for calling a sample unstable.')
 
     args = parser.parse_args()
-
 
     if args.cfg is not None:
         config_file_path = os.path.abspath(args.cfg)
@@ -120,8 +116,6 @@ if __name__ == "__main__":
     for key in filepath_vars:
         if key in config and config[key] is not None:
             config[key] = os.path.abspath(config[key])
-
-
         
     if 'bedfile' not in config:
         print('Error: BED file not provided!')
@@ -146,7 +140,8 @@ if __name__ == "__main__":
             exit(1)
         else:
             # Make sure a corresponding .BAI index file exists
-            if not os.path.isfile('{0}.bai'.format(normal_filepath)) and not os.path.isfile('{0}.bai'.format(normal_filepath[:-4])):
+            if not os.path.isfile('{0}.bai'.format(normal_filepath)) \
+                    and not os.path.isfile('{0}.bai'.format(normal_filepath[:-4])):
                 print('Error: {0} needs corresponding .bai index file!'.format(normal_filepath))
                 exit(1)
             config['normal_filepath'] = normal_filepath
@@ -161,7 +156,8 @@ if __name__ == "__main__":
             exit(1)
         else:
             # Make sure a corresponding .BAI index file exists
-            if not os.path.isfile('{0}.bai'.format(tumor_filepath)) and not os.path.isfile('{0}.bai'.format(tumor_filepath[:-4])):
+            if not os.path.isfile('{0}.bai'.format(tumor_filepath)) \
+                    and not os.path.isfile('{0}.bai'.format(tumor_filepath[:-4])):
                 print('Error: {0} needs corresponding .bai index file!'.format(tumor_filepath))
                 exit(1)            
             config['tumor_filepath'] = tumor_filepath
@@ -174,7 +170,6 @@ if __name__ == "__main__":
         if not os.path.isfile(genome_filepath):
             print('Error: {0} does not exist!'.format(genome_filepath))
             exit(1)
-        
 
     if args.output is None:
         print('Error: Output filename not specified!')
@@ -188,7 +183,6 @@ if __name__ == "__main__":
 
     output_filepath = os.path.abspath(args.output)
 
-
     """
     Nothing below this line should need to be edited, as the code below
     handles the execution of the MANTIS program.
@@ -198,7 +192,6 @@ if __name__ == "__main__":
     kmer_repeat_counter = os.path.join(mantis_folder, 'kmer_repeat_counter.py')
     kmer_count_filter = os.path.join(mantis_folder, 'kmer_count_filter.py')
     instability_calculator = os.path.join(mantis_folder, 'calculate_instability.py')
-
 
     # First, use the k-mer repeat counter to count how many repeats of each
     # repeat unit (k-mer) each locus has, both in the normal and tumor file.
@@ -235,7 +228,6 @@ if __name__ == "__main__":
         print('Error with k-mer repeat count calculations; terminating program.')
         exit(1)
     print('done.')
-    
 
     # Run the outlier filter to get rid of outliers that are likely caused
     # due to sequencing artifacts or one-off biological events.
@@ -262,7 +254,6 @@ if __name__ == "__main__":
     print(response)        
     print('done.')
 
-
     # Calculate instability scores.
     # Analyze locus instability
     command = [
@@ -286,4 +277,3 @@ if __name__ == "__main__":
     print('done.')
 
     print('\nMANTIS complete.')
-
