@@ -9,7 +9,7 @@ import argparse
 import functools
 import re
 import sys
-from helpers import iteritems, tprint, timestamp
+from helpers import iteritems, tprint
 
 
 class LocusResults(object):
@@ -24,7 +24,6 @@ class LocusResults(object):
         self.__is_normalized = False
         # end .__init__()
 
-
     """
     Returns the locus in typical chr:XXXX-YYYY format.
     """
@@ -35,14 +34,12 @@ class LocusResults(object):
             self.end)
         # end .locus()
 
-
     """
     Returns the value of self.__is_normalized.
     """
     def is_normalized(self):
         return self.__is_normalized
         # end .is_normalized()
-
 
     """
     Adds a row of data to the locus. Each input line is expected
@@ -71,7 +68,6 @@ class LocusResults(object):
         return True
         # end .add()
 
-
     """
     Returns the k-values preset in both subsets, or if a 
     subset is specified, in that subset only.
@@ -81,7 +77,7 @@ class LocusResults(object):
         if subset is False:
             for k in self.__k:
                 if (k in self.__normal and self.__normal[k] > 0.0) or \
-                    (k in self.__tumor and self.__tumor[k] > 0.0):
+                        (k in self.__tumor and self.__tumor[k] > 0.0):
                     k_values.add(k)
         else:
             if subset.upper()[0] == 'N':
@@ -126,12 +122,11 @@ class LocusResults(object):
             return sum(self.__tumor.values())
         # end .get_support()
 
-
     """
     Returns the k-number and support count values for the
     specified subset. 
     """
-    def get_values(self, subset, normalized = True):
+    def get_values(self, subset, normalized=True):
         if not LocusResults.__subset_check(subset):
             return False
 
@@ -149,7 +144,6 @@ class LocusResults(object):
         return deepcopy(data)
         # end .get_values()
 
-
     """
     Normalizes the data in the locus to account for coverage depth
     differences between normal and tumor samples.
@@ -159,7 +153,6 @@ class LocusResults(object):
         self.__tumor_normalized = self.__normalized_subset('T', self.__tumor)   
         self.__is_normalized = True
         # end .normalize()
-
 
     """
     Normalizes the subset of data, so that for each subset (N/T),
@@ -180,7 +173,6 @@ class LocusResults(object):
         # end .__normalized_subset()
 
     # end LocusResults class definition.
-
 
 
 class Metric(object):
@@ -222,8 +214,6 @@ class Metric(object):
     # end Metric class definition.
 
 
-
-
 class EuclideanDistance(Metric):
     @staticmethod
     def get(locus):
@@ -234,6 +224,7 @@ class EuclideanDistance(Metric):
         return numpy.sqrt(distance_squared)
         # end EuclideanDistance.get()
     # end EuclideanDistance class definition
+
 
 class CosineDissimilarity(Metric):
     @staticmethod   
@@ -259,6 +250,7 @@ class CosineDissimilarity(Metric):
         # end CosineDissimilarity.get()
     # end CosineDissimilarity class definition
 
+
 class Difference(Metric):
     @staticmethod
     def get(locus):
@@ -270,13 +262,12 @@ class Difference(Metric):
     # end Difference class definition
 
 
-
 def load_loci(input_filepath):
     loci = {}
     with open(input_filepath, 'r') as filein:
         n = 0
         for line in filein:
-            if n is 0:
+            if n == 0:
                 # First line (header row), skip it
                 n = 1
                 continue
@@ -290,6 +281,7 @@ def load_loci(input_filepath):
     return loci
     # end load_loci()
 
+
 # Helper method for status output.
 def status_call(threshold, value):
     if value >= threshold:
@@ -297,6 +289,7 @@ def status_call(threshold, value):
     else:
         return 'Stable'
     # end status_call()
+
 
 # Generates output for estimated sample status based on
 # threshold values provided to the script.
@@ -325,9 +318,9 @@ def status_output(filepath, thresholds, difference, distance, dissimilarity):
         status_call(thresholds['COS'], dissimilarity),
         ])
 
-    output.append(['\nNote: The authors recommend the use of the Step-Wise Difference\n' + 
-        'metric for determining the status of the sample. Any value greater\n' +
-        'than or equal to the threshold is called unstable.'])
+    output.append(['\nNote: The authors recommend the use of the Step-Wise Difference\n' +
+                   'metric for determining the status of the sample. Any value greater\n' +
+                   'than or equal to the threshold is called unstable.'])
 
     fileout = open(filepath, 'w')
     for line in output:
@@ -337,8 +330,11 @@ def status_output(filepath, thresholds, difference, distance, dissimilarity):
     fileout.close()
     # end status_output()
 
+
 strip_chr_re = re.compile(r'^chr')
-#Helper method for ordering loci
+
+
+# Helper method for ordering loci
 def cmp_loci(x, y):
     def parse_locus(l):
         pieces = l.split(':')
@@ -346,49 +342,49 @@ def cmp_loci(x, y):
         pieces = pieces[1].split('-')
         start = int(pieces[0])
         end = int(pieces[1])
-        return (chr, start, end)
+        return chr, start, end
     x_chr, x_start, x_end = parse_locus(x)
     y_chr, y_start, y_end = parse_locus(y)
-    if (x_chr.isdigit() and not y_chr.isdigit()):
+    if x_chr.isdigit() and not y_chr.isdigit():
         return -1
-    elif (y_chr.isdigit() and not x_chr.isdigit()):
+    elif y_chr.isdigit() and not x_chr.isdigit():
         return 1
     elif x_chr.isdigit():
         x_chr = int(x_chr)
         y_chr = int(y_chr)
-    if (x_chr < y_chr):
+    if x_chr < y_chr:
         return -1
-    elif (x_chr > y_chr):
+    elif x_chr > y_chr:
         return 1
-    if (x_start < y_start):
+    if x_start < y_start:
         return -1
-    elif (x_start > y_start):
+    elif x_start > y_start:
         return 1
-    elif (x_end < y_end):
+    elif x_end < y_end:
         return -1
-    elif (x_end > y_end):
+    elif x_end > y_end:
         return 1
     else:
         return 0
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-i', '--input', dest='input', type=str, required=True,
-        help='Input file (K-mer counts).')
+                        help='Input file (K-mer counts).')
 
     parser.add_argument('-o', '--output', dest='output', type=str, required=True,
-        help='Output file.')
+                        help='Output file.')
 
     parser.add_argument('--difference-threshold', dest='dif_threshold', type=float,
-        help='Default difference threshold value for calling a sample unstable.')
+                        help='Default difference threshold value for calling a sample unstable.')
 
     parser.add_argument('--distance-threshold', dest='euc_threshold', type=float,
-        help='Default distance threshold value for calling a sample unstable.')
+                        help='Default distance threshold value for calling a sample unstable.')
 
     parser.add_argument('--dissimilarity-threshold', dest='cos_threshold', type=float,
-        help='Default dissimilarity threshold value for calling a sample unstable.')
-
+                        help='Default dissimilarity threshold value for calling a sample unstable.')
 
     args = parser.parse_args()
 
@@ -417,7 +413,6 @@ if __name__ == "__main__":
     else:
         thresholds['COS'] = float(args.cos_threshold)
 
-
     output_filepath = os.path.abspath(args.output)
     status_filepath = output_filepath + '.status'
 
@@ -426,8 +421,6 @@ if __name__ == "__main__":
     fileout = open(output_filepath, 'w')
     line = '\t'.join(['Locus', 'Normal_Reads', 'Tumor_Reads', 'Difference', 'Distance', 'Dissimilarity'])
     fileout.write(line + '\n')
-
-
 
     # Iterate through all the results to generate the output. As part of the
     # loop, count the weighted values for each metric.
@@ -461,7 +454,6 @@ if __name__ == "__main__":
 
         fileout.write(line + '\n')
         # end of per-locus for loop
-
 
     if len(values['difference']) > 0:
         # Generate output for final average scores.

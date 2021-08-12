@@ -24,15 +24,13 @@ class MANTIS_Filter(object):
             if self.locus == '':
                 self.locus = line[0]
             elif line[0] != self.locus:
-                tprint('MANTIS_Filter.Locus error: Fed data for ' + 
-                    '{0} to locus {1}!'.format(line[0], self.locus))
+                tprint('MANTIS_Filter.Locus error: Fed data for ' + '{0} to locus {1}!'.format(line[0], self.locus))
                 return False
             k = int(line[1])
             n = int(line[2])
             t = int(line[3])
             if k in self.k:
-                tprint('MANTIS_Filter.Locus error: Duplicate entry for ' + 
-                    'repeat count {0}!'.format(k))
+                tprint('MANTIS_Filter.Locus error: Duplicate entry for ' + 'repeat count {0}!'.format(k))
                 return False
 
             self.k.add(k)
@@ -63,18 +61,15 @@ class MANTIS_Filter(object):
             return output
             # end .generate_output()
 
-
         """
         Checks if both the normal and tumor data have 
         the minimum required coverage.
         """
         def has_min_coverage(self, min_coverage):
-            if (sum(self.n.values()) < min_coverage) \
-                or (sum(self.t.values()) < min_coverage):
+            if (sum(self.n.values()) < min_coverage) or (sum(self.t.values()) < min_coverage):
                 return False
             return True
             # end .has_min_coverage()
-
 
         """
         Generates a list of values from the repeat counts and
@@ -187,10 +182,6 @@ class MANTIS_Filter(object):
 
         # end MANTIS_Filter.Locus subclass definition
 
-
-
-
-
     def __init__(self, config):
         self.min_locus_coverage = config['min_locus_coverage']
         self.min_repeat_reads = config['min_repeat_reads']
@@ -222,7 +213,6 @@ class MANTIS_Filter(object):
         return locus
         # end .filter_locus()
 
-
     """
     Writes output data into specified file, iterating
     through each (filtered) locus, generating the output
@@ -242,7 +232,6 @@ class MANTIS_Filter(object):
         return True
         # end .write_output()
 
-
     """
     Loads the data from the input file and stores the per-locus
     data for filtering.
@@ -250,7 +239,7 @@ class MANTIS_Filter(object):
     def load_loci(self, input_filepath):
         self.loci = {}
         self.ordered_loci = []
-        with open(input_filepath, 'Ur') as f:
+        with open(input_filepath, 'r') as f:
             header = True
             for line in f:
                 if header:
@@ -284,8 +273,8 @@ class MANTIS_Filter(object):
         return is_header
         # end .line_is_header()
 
-
     # end MANTIS_Filter class definition
+
 
 """
 Attempts to filter out undesirable noise in the filter, in
@@ -301,26 +290,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=prog_name)
 
     parser.add_argument('-i', '--input', dest='input', type=str, required=True,
-        help='Input file (.kmer_counts)')
+                        help='Input file (.kmer_counts)')
 
     parser.add_argument('-o', '--output', dest='output', type=str, required=True,
-        help='Output filename.')
+                        help='Output filename.')
 
     parser.add_argument('-mlc', '--min-locus-coverage', dest='mlc', type=int,
-        default=20, help='Minimum coverage required for each of the normal ' +
-        'and tumor results.')
+                        default=20, help='Minimum coverage required for each of the normal ' +
+                                         'and tumor results.')
 
     parser.add_argument('-mrr', '--min-repeat-reads', dest='mrr', type=int,
-        default=5, help='Minimum reads supporting a specific repeat count.')
+                        default=5, help='Minimum reads supporting a specific repeat count.')
 
     parser.add_argument('-sd', '--standard-deviations', dest='sd', type=float,
-        default=3.0, help='Standard deviations from mean before repeat count is ' +
-        'considered an outlier')
+                        default=3.0, help='Standard deviations from mean before repeat count is ' +
+                                          'considered an outlier')
 
     args = parser.parse_args()
-
-
-
         
     input_filepath = os.path.abspath(args.input)
     if not os.path.isfile(input_filepath):
@@ -340,7 +326,6 @@ if __name__ == "__main__":
     if args.sd < 0.0:
         tprint('Error: Standard deviation count cannot be below 0.')
         exit(1)        
-
 
     config = {
         'min_locus_coverage': int(args.mlc),

@@ -10,6 +10,8 @@ import os
 """
 Helper class that stores data needed for the parameter loading.
 """
+
+
 class Parameter(object):
     def __init__(self, key=None, arg_key=None, required=False, default=None):
         self.__key = key
@@ -39,6 +41,8 @@ class Parameter(object):
 Loads any configured values from the config file and
 returns them as a dict object.
 """
+
+
 def load_config_file(filepath):
     config = {}
     with open(filepath, 'Ur') as f:
@@ -57,12 +61,15 @@ def load_config_file(filepath):
     return config
     # end load_config_file()
 
+
 """
 Performs the three-tier priority loading of config settings,
 where command line arguments get the highest priority, followed
 by config file settings, and finally followed by the default
 values for the parameters.
 """
+
+
 def load_settings(params, config_file_path, args):
     settings = {}
 
@@ -79,7 +86,7 @@ def load_settings(params, config_file_path, args):
             # Command line args take precedence.
             settings[key] = getattr(args, arg_key)
         elif key in config_values:
-            # Configuration file takes second priorty.
+            # Configuration file takes second priority.
             settings[key] = config_values[key]
         elif param.default() is not None:
             # Default values take third priority.

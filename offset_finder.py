@@ -6,6 +6,7 @@ from copy import deepcopy
 from structures import CIGAR
 import time
 
+
 class OffsetFinder:
     max_iterations = 10
 
@@ -84,7 +85,7 @@ class OffsetFinder:
         while cigar:
             token = cigar[0][0]
             size = cigar[0][1]
-            cigar.pop(0) # Remove this CIGAR segment.
+            cigar.pop(0)  # Remove this CIGAR segment.
 
             if token == 'S':
                 # Soft clipped segment. This should not happen in the middle 
@@ -130,7 +131,6 @@ class OffsetFinder:
                         offset += OffsetFinder.boundary_indel_offset(
                             read, locus, cigar, offset, genomic_pos)
 
-
                 elif genomic_pos + size == locus.start - 1:
                     # Right before the locus boundary. As with the previous
                     # case, make sure an indel in the next CIGAR segment
@@ -147,17 +147,14 @@ class OffsetFinder:
 
                     genomic_pos += size
 
-
             if genomic_pos >= locus.start:
                 # MSI locus reached
                 break
-
 
         # Return the estimate offset. 
         return offset
 
         # end .estimate_offset()
-
 
     """
     Handles cases where an indel exists right at the locus boundary.

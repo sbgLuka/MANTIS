@@ -28,10 +28,8 @@ class MSILocusLoader:
         if 'genome' in config:
             self.genome_path = config['genome']
         else:
-            tprint('MSILocusLoader warning: You need to specify a path' +
-                ' to the reference genome!')
+            tprint('MSILocusLoader warning: You need to specify a path' + ' to the reference genome!')
         # end .__init__()
-
 
     """
     Loads BED file into a list of Locus objects.
@@ -40,8 +38,7 @@ class MSILocusLoader:
         loci = []
         bedfile = os.path.abspath(bedfile)
         if not os.path.isfile(bedfile):
-            tprint('MSILocusLoader error: File {0}'.format(bedfile) + 
-                ' does not exist!')
+            tprint('MSILocusLoader error: File {0}'.format(bedfile) + ' does not exist!')
         else:
             with open(bedfile, 'r') as filein:
                 for line in filein.readlines():
@@ -68,12 +65,10 @@ class MSILocusLoader:
     def correct_off_by_one_errors(self, locus):
         # Generate the locus position by adding a 1 basepair padding around the locus
         # coordinates, which accounts for the off-by-one errors.
-        position = '{0}:{1}-{2}'.format(locus.chromosome, 
-            locus.start - 1, 
-            locus.end + 1)
+        position = '{0}:{1}-{2}'.format(locus.chromosome, locus.start - 1, locus.end + 1)
         
         raw_sequence = self.get_sequence(position)
-        #accommodate newer versions of PySam, which causes this to return chromosome and position
+        # accommodate newer versions of PySam, which causes this to return chromosome and position
         raw_sequence = raw_sequence.split(":")[-1]
         sequence = MSILocusLoader.strip_coord_re.sub("", raw_sequence)
         if sequence[1:1+locus.kmer_length] != locus.kmer:
@@ -87,8 +82,7 @@ class MSILocusLoader:
                 locus.start += 1
                 locus.end += 1
             else:
-                tprint('Error: Specified locus does not appear '
-                    + ' to be the starting point for kmer {kmer}.'.format(
+                tprint('Error: Specified locus does not appear ' + ' to be the starting point for kmer {kmer}.'.format(
                         kmer=locus.kmer))
         # end .correct_off_by_one_errors()
 
@@ -98,8 +92,8 @@ class MSILocusLoader:
     """
     def get_sequence(self, locus):
         if self.genome_path is None:
-            tprint('MSILocusLoader error: Can not use .get_sequence() without' 
-                + ' specifying the path to the reference genome!')
+            tprint('MSILocusLoader error: Can not use .get_sequence() without' +
+                   ' specifying the path to the reference genome!')
             exit(1)
     
         sequence = []
@@ -109,11 +103,6 @@ class MSILocusLoader:
         # end .get_sequence()    
 
     # end MSILocusLoader class definition.
-
-
-
-
-
 
 
 class KmerRepeatCounter:
@@ -129,7 +118,6 @@ class KmerRepeatCounter:
         self.__consumers = list()
         self.__producer = None
         # end .__reset()
-
 
     """
     Estimates if the read is likely to be truncated within the target
@@ -151,7 +139,6 @@ class KmerRepeatCounter:
                 truncated = True
         return truncated
         # end .read_has_truncation()
-
 
     """
     Checks if the read passes the minimum QC requirements; currently
@@ -194,14 +181,12 @@ class KmerRepeatCounter:
         return score
         # End .symbol_to_quality_score()
 
-
     """
     Checks if the repeating locus (as opposed to the entire read)
     has sufficient quality to pass the QC filter.
     """
     def passes_locus_qc_filter(self, read, offset_start, offset_end):
-        locus_mean_quality = KmerRepeatCounter.subset_mean_quality(read, 
-            offset_start, offset_end)
+        locus_mean_quality = KmerRepeatCounter.subset_mean_quality(read, offset_start, offset_end)
         if locus_mean_quality < self.min_locus_quality:
             # failed locus QC filter
             return False 
@@ -276,7 +261,7 @@ class KmerRepeatCounter:
     within the given sequence.
     """
     @staticmethod
-    def kmer_repeat_count(kmer, sequence, offset = 0):
+    def kmer_repeat_count(kmer, sequence, offset=0):
         repeats = 0
         klen = len(kmer)
         while True:
@@ -311,7 +296,7 @@ class KmerRepeatCounter:
                 if self.read_has_truncation(read, locus, offset, repeat_count):
                     # Exclude this read
                     repeat_count = -1
-        return (repeat_count, offset,)
+        return repeat_count, offset,
         # end .locus_repeat_count()
 
     """
@@ -334,7 +319,6 @@ class KmerRepeatCounter:
             if with_chr[0:3] != 'chr':
                 with_chr = 'chr{0}'.format(with_chr)
             without_chr = with_chr[3:]
-
 
             # Make sure the start coordinate isn't below 1
             start_pos = locus.start - 5
@@ -373,7 +357,6 @@ class KmerRepeatCounter:
             return None
         # end .bam_uses_chr_prefixes()
 
-
     """
     Producer thread that reads data from the BAM file and populates the queue
     with matched reads using pysam; uses semaphores to prevent loss of 
@@ -409,7 +392,6 @@ class KmerRepeatCounter:
                 if start_pos < 1:
                     start_pos = 1
                 end_pos = locus.end + 5
-
 
                 for read in source.fetch(chromosome, start_pos, end_pos):
                     # Use AlignedSegment object to create a list, which is
@@ -450,7 +432,7 @@ class KmerRepeatCounter:
         for i in range(0, consumers * 2):
             empty.acquire()
             mutex.acquire()
-            queue.put([False,False])
+            queue.put([False, False])
             mutex.release()
             full.release()
         if self.debug_output:
@@ -458,23 +440,19 @@ class KmerRepeatCounter:
         return True
         # end .extract_reads()
 
-
-
     """
     Consumer thread that reads data put on the queue by the BAM reading thread; 
     processes each read to get the repeat count for the repeat unit (k-mer).
     """
     def read_analyzer(self, queue_in, queue_out, full, empty, mutex_in, mutex_out, queue_full):
-        query_delay = 0.100 # in seconds
+        query_delay = 0.100  # in seconds
         n = 0
         if self.debug_output:
             tprint('Analyzer> Thread {0} started.'.format(os.getpid()))
         while True:
             n += 1
             if self.debug_output and (n % 10000 is 0):
-                tprint('Analyzer> Thread {0}'.format(os.getpid()) +
-                    ' still ALIVE, loop {0}'.format(n))
-
+                tprint('Analyzer> Thread {0}'.format(os.getpid()) + ' still ALIVE, loop {0}'.format(n))
 
             full.acquire()
             mutex_in.acquire()
@@ -487,8 +465,7 @@ class KmerRepeatCounter:
             if not locus:
                 # Element was set to FALSE; signals thread termination.
                 if self.debug_output:
-                    tprint('Analyzer> Thread {0}'.format(os.getpid()) +
-                    ' received termination signal.')
+                    tprint('Analyzer> Thread {0}'.format(os.getpid()) + ' received termination signal.')
                 break
 
             if self.passes_qc_filter(read):
@@ -533,11 +510,9 @@ class KmerRepeatCounter:
             queue_status = '{0} ITEMS'.format(qsize)
 
         if self.has_live_producer() and not self.has_live_consumers():
-                tprint(fail + 'Main> Analyzer(s) LIVE, Extractor DEAD, Queue ' + 
-                    queue_status + '. ' + reset)
-                tprint(fail + 'Main> Teriminating process due to ' + 
-                    'multiprocessing failure.' + reset)
-                exit(1)
+            tprint(fail + 'Main> Analyzer(s) LIVE, Extractor DEAD, Queue ' + queue_status + '. ' + reset)
+            tprint(fail + 'Main> Teriminating process due to ' + 'multiprocessing failure.' + reset)
+            exit(1)
 
         # end .status_check()    
 
@@ -582,7 +557,6 @@ class KmerRepeatCounter:
             consumer_threads))
         self.__producer.start()
 
-
         # Spawn the set amount of threads/processes
         if self.debug_output:
             tprint('Main> Generating {0} analyzer process(es).'.format(consumer_threads))
@@ -600,11 +574,11 @@ class KmerRepeatCounter:
 
         # Iterate through the loci, fetching any reads and pushing them to 
         # the pool of threads, collecting the output as they process it.
-        query_delay = 0.050 # In seconds
+        query_delay = 0.050  # In seconds
        
         loop_counter = 0
         proc_check_interval = 100
-        while (not queue_out.empty() or self.has_live_threads()):
+        while not queue_out.empty() or self.has_live_threads():
             # Sleep for the set amount of time so the queue isn't constantly
             # getting hammered with queries
             time.sleep(query_delay)
@@ -645,15 +619,13 @@ class KmerRepeatCounter:
     
     # end KmerRepeatCounter class definition.
 
- 
-
-
-
 
 """
 Use arguments from the command line parameters (input: args)
 to generate a config setting dict.
 """
+
+
 def generate_config(args):
     config = {}
 
@@ -664,8 +636,7 @@ def generate_config(args):
 
     config['threads'] = int(args.threads)
     if config['threads'] < 1:
-        tprint('Error: Cannot specify less than one thread. '
-            + '(Provided {0}).'.format(config['threads']))
+        tprint('Error: Cannot specify less than one thread. ' + '(Provided {0}).'.format(config['threads']))
         exit(1)
 
     config['bedfile'] = os.path.abspath(args.bedfile)
@@ -696,7 +667,6 @@ def generate_config(args):
             tprint('Error: {0} does not exist!'.format(config['tumor_filepath']))
             exit(1)
 
-
     if args.output is None:
         tprint('Error: Output filepath must be specified!')
     else:
@@ -706,7 +676,6 @@ def generate_config(args):
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
 
-
     config['min_read_quality'] = float(args.mrq)
     config['min_read_length'] = int(args.mrl)
     config['min_locus_quality'] = float(args.mlq)
@@ -714,8 +683,11 @@ def generate_config(args):
     return config
     # end .generate_config()
 
+
 strip_chr_re = re.compile(r'^chr')
-#Helper method for ordering loci
+# Helper method for ordering loci
+
+
 def cmp_loci(x, y):
     def parse_locus(l):
         pieces = l.split(':')
@@ -723,30 +695,31 @@ def cmp_loci(x, y):
         pieces = pieces[1].split('-')
         start = int(pieces[0])
         end = int(pieces[1])
-        return (chr, start, end)
+        return chr, start, end
     x_chr, x_start, x_end = parse_locus(x)
     y_chr, y_start, y_end = parse_locus(y)
-    if (x_chr.isdigit() and not y_chr.isdigit()):
+    if x_chr.isdigit() and not y_chr.isdigit():
         return -1
-    elif (y_chr.isdigit() and not x_chr.isdigit()):
+    elif y_chr.isdigit() and not x_chr.isdigit():
         return 1
     elif x_chr.isdigit():
         x_chr = int(x_chr)
         y_chr = int(y_chr)
-    if (x_chr < y_chr):
+    if x_chr < y_chr:
         return -1
-    elif (x_chr > y_chr):
+    elif x_chr > y_chr:
         return 1
-    if (x_start < y_start):
+    if x_start < y_start:
         return -1
-    elif (x_start > y_start):
+    elif x_start > y_start:
         return 1
-    elif (x_end < y_end):
+    elif x_end < y_end:
         return -1
-    elif (x_end > y_end):
+    elif x_end > y_end:
         return 1
     else:
         return 0
+
 
 """
 Write the output of the program into the target file.
@@ -756,16 +729,18 @@ The output consists of tab-separated values, with each line having:
 - supporting reads for k-value in normal BAM
 - supporting reads for k-value in tumor BAM
 """
+
+
 def write_output(filepath, normal, tumor):
     fileout = open(filepath, 'w')
 
     loci = set(normal.keys())
     loci = loci.union(tumor.keys())
-    if (sys.version_info > (3, 0)):
+    if sys.version_info > (3, 0):
         loci = sorted(loci, key=functools.cmp_to_key(cmp_loci))
     else:
         loci = sorted(loci, cmp=cmp_loci)
-    header = '\t'.join(['Locus','Repeats','Normal','Tumor'])
+    header = '\t'.join(['Locus', 'Repeats', 'Normal', 'Tumor'])
     fileout.write(header + '\n')
     for locus in loci:
         locus_output = generate_locus_output(normal[locus], tumor[locus])
@@ -781,6 +756,8 @@ def write_output(filepath, normal, tumor):
 """
 Helper method for generating the output lines to be written.
 """
+
+
 def generate_locus_output(normal, tumor):
     output = []
     # Get repeat lengths to use as keys for accessing
@@ -800,9 +777,12 @@ def generate_locus_output(normal, tumor):
     return output
     # end .generate_locus_output()
 
+
 """
 Uses PySAM to generate index for BAM file if one doesn't exist.
 """
+
+
 def generate_index_if_needed(filepath):
     index_file = os.path.abspath(filepath) + '.bai'
     if not os.path.isfile(index_file) and not os.path.isfile(os.path.abspath(filepath)[:-4] + '.bai'):
@@ -811,42 +791,43 @@ def generate_index_if_needed(filepath):
     return True
     # end .generate_index_if_needed()
 
+
 if __name__ == "__main__":
     prog_name = 'MANTIS K-Mer Repeat Counter'
     tprint(prog_name)
 
     parser = argparse.ArgumentParser(description=prog_name)
 
-    parser.add_argument('-n', '--normal', dest='normal', type=str, 
-        required=True, help='Normal input (SAM/BAM) file.')
+    parser.add_argument('-n', '--normal', dest='normal', type=str,
+                        required=True, help='Normal input (SAM/BAM) file.')
 
-    parser.add_argument('-t', '--tumor', dest='tumor', type=str, 
-        required=True, help='Tumor input (SAM/BAM) file.')
+    parser.add_argument('-t', '--tumor', dest='tumor', type=str,
+                        required=True, help='Tumor input (SAM/BAM) file.')
 
     parser.add_argument('-b', '--bedfile', dest='bedfile', type=str,
-        required=True, help='Input BED file.')
+                        required=True, help='Input BED file.')
 
-    parser.add_argument('-o', '--output', dest='output', type=str, 
-        help='Output BED filename.')
+    parser.add_argument('-o', '--output', dest='output', type=str,
+                        help='Output BED filename.')
 
     parser.add_argument('-mrq', '--min-read-quality', dest='mrq',
-        type=float, default=10.0, help='Minimum average read quality.')
+                        type=float, default=10.0, help='Minimum average read quality.')
 
     parser.add_argument('-mlq', '--min-locus-quality', dest='mlq',
-        type=float, default=20.0, help='Minimum average locus quality.')
+                        type=float, default=20.0, help='Minimum average locus quality.')
 
     parser.add_argument('-mrl', '--min-read-length', dest='mrl',
-        type=int, default=35, 
-        help='Minimum (unclipped/unmasked) read length.')
+                        type=int, default=35,
+                        help='Minimum (unclipped/unmasked) read length.')
 
     parser.add_argument('--threads', dest='threads', type=int,
-        default=1, help='Number of threads/proceseses to use.')
+                        default=1, help='Number of threads/proceseses to use.')
 
     parser.add_argument('--genome', dest='genome', type=str,
-        help='Path to reference genome (FASTA).')
+                        help='Path to reference genome (FASTA).')
 
     parser.add_argument('--debug', dest='debug_output', action='store_true',
-        help='Print debug output from multithreading.')
+                        help='Print debug output from multithreading.')
 
     args = parser.parse_args()
 
@@ -862,15 +843,13 @@ if __name__ == "__main__":
     # Generate instance of the Kmer Repeat Counter
     krc = KmerRepeatCounter(config)
 
-    tprint('Processing normal input file with ' +
-        '{0} thread(s) ...'.format(config['threads']))
+    tprint('Processing normal input file with ' + '{0} thread(s) ...'.format(config['threads']))
     generate_index_if_needed(config['normal_filepath'])
     normal = krc.process(config['normal_filepath'], msi_loci, config)
     tprint('Done processing normal.')
 
     krc = KmerRepeatCounter(config)
-    tprint('Processing tumor input file with ' +
-        '{0} thread(s) ...'.format(config['threads']))
+    tprint('Processing tumor input file with ' + '{0} thread(s) ...'.format(config['threads']))
     generate_index_if_needed(config['tumor_filepath'])    
     tumor = krc.process(config['tumor_filepath'], msi_loci, config)  
     tprint('Done processing tumor.')

@@ -11,8 +11,10 @@ import time
 Container class that holds information from SAM/BAM reads in a format
 that is useful for MANTIS.
 """
+
+
 class SAMRead(object):
-    def __init__(self,line):
+    def __init__(self, line):
         if type(line) is str:
             line = line.strip().split('\t')
             self.qname = line[0]
@@ -71,15 +73,12 @@ class SAMRead(object):
         self.end = self.start + gen_length
     # end .preprocess_read()
 
-
-
     def calculate_quality(self, offset=0, length=0):
         if length < 1:
             length = len(self.qual)
 
         if length is 0:
             return 0.0
-
 
         total_score = 0
         for i in range(offset, offset+length):
@@ -116,13 +115,15 @@ class SAMRead(object):
 """
 Helper class for handling CIGAR strings.
 """
+
+
 class CIGAR(object):
     # Converts the CIGAR string to a token+length array
     @staticmethod
     def to_array(string):
         if string == '*':
             return []
-        tokens = ['M','S','N','I','D','H']
+        tokens = ['M', 'S', 'N', 'I', 'D', 'H']
         for token in tokens:
             string = string.replace(token, token + '.')
         string = filter(None, string.split('.'))
@@ -172,11 +173,15 @@ class CIGAR(object):
         # end .show_sequence()
     # end CIGAR class definition.
 
+
 """
 Class that represents a genomic locus.
 """
+
+
 class Locus(object):
     locus_number = 1
+
     def __init__(self, line):
         line = line.strip().split('\t')
         self.chromosome = line[0]
@@ -204,7 +209,7 @@ class Locus(object):
         # end .locus()
 
     def get_hash(self):
-        h = []
+        h = list()
         h.append(self.locus())
         if self.kmer is not None:
             k = '({0}){1}'.format(self.kmer, self.repeats)
@@ -220,10 +225,13 @@ class Locus(object):
         # end .__str__()
     # end Locus class definition.
 
+
 """
 Class that expands the base Locus class to include
 other data needed by an MSI locus.
 """
+
+
 class MSILocus(Locus):
     def __init__(self, line):
         line = line.strip().split('\t')
