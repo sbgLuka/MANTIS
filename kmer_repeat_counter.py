@@ -134,7 +134,7 @@ class KmerRepeatCounter:
 
         elif offset < locus.kmer_length:
             # Possible 5' truncation
-            if (offset is 0) or read.seq[0:offset] == locus.kmer[offset:]:
+            if offset == 0 or read.seq[0:offset] == locus.kmer[offset:]:
                 # No offset OR offset matches fragment of kmer; likely truncation
                 truncated = True
         return truncated
